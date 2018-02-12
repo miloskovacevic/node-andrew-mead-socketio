@@ -2,16 +2,9 @@ let socket = io();
 socket.on('connect', function() {
     console.log('connected to server!');
 });
-// socket.emit('createMessage', {
-//     from: 'Milos',
-//     text: 'Cao kako si ?!',
-//     createdAt: new Date().getTime()
-// });
 
 socket.on('disconnect', function() {
     console.log('disconnected!');
-
- 
 })
 
 socket.on('newMessage', function(message) {
@@ -21,6 +14,17 @@ socket.on('newMessage', function(message) {
     li.text(`${message.from}: ${message.text}`);
 
     jQuery("#messages").append(li);
+});
+
+socket.on('newLocationMessage', function(msg) {
+    let li = jQuery('<li></li>');
+    let a = jQuery('<a target="_blank">My current location</a>');
+
+    li.text(`${msg.from}: `);
+    a.attr('href', msg.url);
+    li.append(a);
+    jQuery("#messages").append(li);
+    
 });
 
 jQuery("#message-form").on("submit", function(e) {
@@ -34,9 +38,21 @@ jQuery("#message-form").on("submit", function(e) {
     })
 })
 
-// socket.on('welcomeMessage', function(welcomeMessage) {
-//     console.log('welcome message', welcomeMessage);
-// });
+let locationButton = jQuery("#send-location");
+locationButton.on("click", function () {
+    if (!navigator.geolocation) {
+        return alert('no location support!');
+    }
 
+    navigator.geolocation.getCurrentPosition(function(position) {
+        socket.emit('createLocationMessage', {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+        });
+    }, function () {
+        alert('unable to fetch location!');
+    });
+
+});
 
 
